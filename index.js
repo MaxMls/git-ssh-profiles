@@ -1,11 +1,13 @@
 
 const http = require("http");
 const util = require("util");
-const host = 'localhost';
+const host = '0.0.0.0';
 const port = 40806;
 const fs = require('fs')
 const exec = util.promisify(require('child_process').exec);
 const os = require('os');
+
+const sshDir = os.homedir() + '/.ssh/'
 
 function mutate(s) {
     return function splice() {
@@ -21,7 +23,7 @@ const requestListener = async (req, res) => {
     const profileName = req.url.split('/')[1]
 
     try {
-        profiles = JSON.parse(fs.readFileSync(os.homedir() + '/.ssh/git-ssh-profiles.json', 'utf8'))
+        profiles = JSON.parse(fs.readFileSync(sshDir + 'git-ssh-profiles.json', 'utf8'))
     } catch { }
 
     const profile = profiles[profileName]
@@ -54,7 +56,7 @@ const requestListener = async (req, res) => {
     let config = ''
 
     try {
-        config = fs.readFileSync(os.homedir() + '/.ssh/config', 'utf8')
+        config = fs.readFileSync(sshDir + 'config', 'utf8')
     } catch (e) {
         console.log(e);
     }
@@ -79,7 +81,7 @@ const requestListener = async (req, res) => {
         config += resultString
     }
 
-    fs.writeFileSync(os.homedir() + '/.ssh/config', config, { encoding: "utf8" })
+    fs.writeFileSync(sshDir + 'config', config, { encoding: "utf8" })
 
     res.writeHead(200);
     res.end(`<script>window.close()</script>`);
