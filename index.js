@@ -6,8 +6,9 @@ const port = 40806;
 const fs = require('fs')
 const exec = util.promisify(require('child_process').exec);
 const os = require('os');
+const path = require("path");
 
-const sshDir = os.homedir() + '/.ssh/'
+const sshDir = path.join(os.homedir(), '.ssh') 
 
 function mutate(s) {
     return function splice() {
@@ -23,7 +24,8 @@ const requestListener = async (req, res) => {
     const profileName = req.url.split('/')[1]
 
     try {
-        profiles = JSON.parse(fs.readFileSync(sshDir + 'git-ssh-profiles.json', 'utf8'))
+        const file = path.join(sshDir, 'git-ssh-profiles.json')
+        profiles = JSON.parse(fs.readFileSync(file, 'utf8'))
     } catch { }
 
     const profile = profiles[profileName]
@@ -48,7 +50,7 @@ const requestListener = async (req, res) => {
         `Host github.com\n` +
         `    HostName github.com\n` +
         `    User git\n` +
-        `    IdentityFile ${profile.identityFile}\n` +
+        `    IdentityFile ${path.join(sshDir, profile.identityFile)}\n` +
         `${endTemplate}`
 
 
@@ -56,9 +58,10 @@ const requestListener = async (req, res) => {
     let config = ''
 
     try {
-        config = fs.readFileSync(sshDir + 'config', 'utf8')
+        config = fs.readFileSync(path.join(sshDir, 'config'), 'utf8')
     } catch (e) {
         console.log(e);
+        res.end(e);
     }
 
     const startIndex = config.indexOf(startTemplate)
@@ -81,14 +84,22 @@ const requestListener = async (req, res) => {
         config += resultString
     }
 
-    fs.writeFileSync(sshDir + 'config', config, { encoding: "utf8" })
+    fs.writeFileSync(path.join(sshDir, 'config'), config, { encoding: "utf8" })
 
     res.writeHead(200);
     res.end(`<script>window.close()</script>`);
 
 };
 
-const server = http.createServer(requestListener);
+const server = http.createServer(async (req, res)=>{
+    try {
+        await requestListener(req, res)
+    } catch (error) {
+        res.writeHead(500);
+        res.end(`${error}` );
+        console.error(error);
+    }
+});
 server.listen(port, host, () => {
     console.log(`Server is running on http://${host}:${port}`);
 });
