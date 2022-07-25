@@ -5,6 +5,8 @@ npm i -g pm2
 
 # windows steps
 npm install pm2-windows-startup -g
+
+Set-ExecutionPolicy RemoteSigned
 pm2-startup install
 
 # linux steps
