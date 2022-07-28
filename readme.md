@@ -1,3 +1,7 @@
+1 install git  
+https://git-scm.com/download
+
+2
 ```sh
 # install
 
