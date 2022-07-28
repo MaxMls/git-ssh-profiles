@@ -17,4 +17,7 @@ pm2 startup
 
 pm2 start .
 pm2 save
+
+# in git installed after pm2 init run:
+pm2 restart . --update-env
 ```
