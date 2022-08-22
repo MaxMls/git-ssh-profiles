@@ -69,9 +69,10 @@ const requestListener = async (req, res) => {
     console.log(config);
 
     if ((startIndex === -1) !== (endIndex === -1)) {
-        console.error('corrupted config. check it and delete git-ssh-profiles')
+        const msg = 'corrupted config. check it and delete git-ssh-profiles'
+        console.error(msg)
         res.writeHead(500);
-        res.end()
+        res.end(msg)
         return
     }
     console.log({ startIndex, endIndex });
